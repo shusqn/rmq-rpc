@@ -1,4 +1,4 @@
-package com.frame.rocketmq.rpc;
+package io.github.shusqn.rocketmq.rpc;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -23,14 +23,14 @@ import org.springframework.context.ApplicationContextAware;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
-import com.frame.rocketmq.base.AbstractConsumerService;
-import com.frame.rocketmq.base.AbstractProducerService;
-import com.frame.rocketmq.router.RouterCallBackHander;
-import com.frame.rocketmq.router.RouterHander;
-import com.frame.rocketmq.rpc.aopProxy.RpcMqClient;
-import com.frame.rocketmq.rpc.aopProxy.RpcMqServer;
-import com.frame.rocketmq.utils.ClassUtil;
 
+import io.github.shusqn.rocketmq.base.AbstractConsumerService;
+import io.github.shusqn.rocketmq.base.AbstractProducerService;
+import io.github.shusqn.rocketmq.router.RouterCallBackHander;
+import io.github.shusqn.rocketmq.router.RouterHander;
+import io.github.shusqn.rocketmq.rpc.aopProxy.RpcMqClient;
+import io.github.shusqn.rocketmq.rpc.aopProxy.RpcMqServer;
+import io.github.shusqn.rocketmq.utils.ClassUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 

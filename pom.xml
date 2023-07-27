@@ -3,13 +3,47 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.gameserverframe</groupId>
-		<artifactId>game-servers</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<!--https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<!--<version>3.0.3</version> -->
+		<version>2.6.6</version>
 	</parent>
-	<artifactId>game-mq-rpc</artifactId>
+
+	<groupId>io.github.shusqn</groupId>
+	<artifactId>rmq-rpc</artifactId>
+	<version>1.0.0</version>
+	<packaging>jar</packaging>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- logback 依赖 -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.rocketmq</groupId>
 			<artifactId>rocketmq-client</artifactId>
@@ -21,8 +55,9 @@
 			<artifactId>rocketmq-acl</artifactId>
 			<version>4.6.1</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api 
+
+		<!--
+		https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api 
 			jdk17兼容avax.annotation -->
 		<dependency>
 			<groupId>javax.annotation</groupId>
@@ -30,5 +65,5 @@
 			<version>1.3.2</version>
 		</dependency>
 	</dependencies>
-	
+
 </project>

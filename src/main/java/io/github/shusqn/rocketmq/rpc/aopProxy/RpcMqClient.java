@@ -1,5 +1,5 @@
 
-package com.frame.rocketmq.rpc.aopProxy;
+package io.github.shusqn.rocketmq.rpc.aopProxy;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

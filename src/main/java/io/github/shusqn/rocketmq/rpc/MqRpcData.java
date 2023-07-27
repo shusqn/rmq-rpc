@@ -1,4 +1,4 @@
-package com.frame.rocketmq.rpc;
+package io.github.shusqn.rocketmq.rpc;
 
 import com.alibaba.fastjson.JSON;
 

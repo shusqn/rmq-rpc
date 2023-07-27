@@ -1,4 +1,4 @@
-package com.frame.rocketmq.rpc;
+package io.github.shusqn.rocketmq.rpc;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -6,7 +6,7 @@ import java.lang.reflect.Proxy;
 
 import org.springframework.beans.factory.FactoryBean;
 
-import com.frame.rocketmq.rpc.aopProxy.RpcMqClient;
+import io.github.shusqn.rocketmq.rpc.aopProxy.RpcMqClient;
 
 /**
  * RmqRpcService.java

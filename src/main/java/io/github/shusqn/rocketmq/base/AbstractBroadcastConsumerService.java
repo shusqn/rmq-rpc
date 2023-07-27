@@ -1,4 +1,4 @@
-package com.frame.rocketmq.base;
+package io.github.shusqn.rocketmq.base;
 
 import java.util.ArrayList;
 import java.util.List;

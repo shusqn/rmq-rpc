@@ -1,4 +1,4 @@
-package com.frame.rocketmq.utils;
+package io.github.shusqn.rocketmq.utils;
 
 import java.io.File;
 import java.io.FileFilter;

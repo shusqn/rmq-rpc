@@ -1,4 +1,4 @@
-package com.frame.rocketmq.rpc;
+package io.github.shusqn.rocketmq.rpc;
 
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;

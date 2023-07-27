@@ -1,4 +1,4 @@
-package com.frame.rocketmq;
+package io.github.shusqn.rocketmq;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.context.annotation.ComponentScan;

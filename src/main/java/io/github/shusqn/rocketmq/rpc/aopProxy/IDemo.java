@@ -1,4 +1,4 @@
-package com.frame.rocketmq.rpc.aopProxy;
+package io.github.shusqn.rocketmq.rpc.aopProxy;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.frame.rocketmq.router;
+package io.github.shusqn.rocketmq.router;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
