@@ -20,6 +20,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
@@ -37,13 +38,9 @@ import lombok.extern.slf4j.Slf4j;
 /**
  */
 @Slf4j
+@Service
 public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProcessor, ApplicationContextAware{
 	//=============================static===============================
-	/**
-	 * 是否异步
-	 */
-	protected boolean asyn = false;
-	
 	public final int TIME_OUT = 120;
 	/**
 	 * req_rpc_server_
@@ -100,7 +97,7 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 	/**
 	 * rpc type 类型路由器
 	 */
-	private RouterHander<MqRpcData> rpcReqRouter = new RouterHander<MqRpcData>() {};
+	private RouterHander<Rmq_data> rpcReqRouter = new RouterHander<Rmq_data>() {};
 	private int localServerId;
 	private boolean initOK = false;
 	
@@ -157,8 +154,8 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 				mqRespReceive = new MqRpcReceive(MqRpcReceive.TYPE_RESP);
 				mqRespReceive.start(nameServerAddr, 
 						RESP_RPC_SERVER + serverType, 
-						CONSUMER_RESP_RPC_SERVER + serverType,
-						CONSUMER_RESP_RPC_SERVER + serverType, accessKeyAndsecretKey[0],  accessKeyAndsecretKey[1], true);
+						CONSUMER_RESP_RPC_SERVER  + serverType,
+						CONSUMER_RESP_RPC_SERVER  + serverType, accessKeyAndsecretKey[0],  accessKeyAndsecretKey[1], true);
 			}
 		}
 		else {
@@ -169,15 +166,15 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 				mqReqReceive = new MqRpcReceive(MqRpcReceive.TYPE_REQ);
 				mqReqReceive.start(nameServerAddr, 
 						REQ_RPC_SERVER + localServerId, 
-						CONSUMER_REQ_RPC_SERVER + localServerId,
-						CONSUMER_REQ_RPC_SERVER + localServerId, true);
+						CONSUMER_REQ_RPC_SERVER  + localServerId,
+						CONSUMER_REQ_RPC_SERVER  + localServerId, true);
 			}
 			if(serverType != null) {
 				mqRespReceive = new MqRpcReceive(MqRpcReceive.TYPE_RESP);
 				mqRespReceive.start(nameServerAddr, 
 						RESP_RPC_SERVER + serverType, 
-						CONSUMER_RESP_RPC_SERVER + serverType,
-						CONSUMER_RESP_RPC_SERVER + serverType, true);
+						CONSUMER_RESP_RPC_SERVER  + serverType,
+						CONSUMER_RESP_RPC_SERVER  + serverType, true);
 			}
 		}
 		rocketMqSender.showSendLogs = false;
@@ -210,12 +207,12 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 	 * @param toServerId
 	 * @param rs
 	 */
-	protected MqRpcData sendAndReceiveRpcMsg(Consumer<MqRpcData> backFunc, String reqMapping, Object serverName, Object[] args) {
+	protected Rmq_data sendAndReceiveRpcMsg(Consumer<Rmq_data> backFunc, String reqMapping, Object serverName, Object[] args) {
 		if(!initOK) {
 			throw new RuntimeException("非法操作, RocketMqRpcService 未被初始化");
 		}
 		long msgId = msgIdBuilder.getAndIncrement();
-		MqRpcData data = MqRpcData.build(msgId, reqMapping, localServerId, serverName, args);
+		Rmq_data data = Rmq_data.build(msgId, reqMapping, localServerId, serverName, args);
 		rocketMqSender.sendMessage(RESP_RPC_SERVER +data.getServer(), data, data.getMsgId());
 		rpcReqRouter.registHandler(msgId, backFunc);
 		log.debug("sendRpc msgId:{} data:{}", data.getMsgId(), JSON.toJSON(data));
@@ -252,7 +249,7 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 		 * @param message
 		 */
 		private void receiveMqData(String message) {
-			MqRpcData data = JSON.parseObject(message, MqRpcData.class, Feature.SupportNonPublicField);
+			Rmq_data data = JSON.parseObject(message, Rmq_data.class, Feature.SupportNonPublicField);
 			log.debug("getRpc msgId:{} type:{} data:{}",data.getMsgId(), type == 1 ? "reqtype":"resptype", message);
 			if(type == TYPE_RESP) {
 				try {
@@ -283,9 +280,6 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 	
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-		if(asyn) {
-			return;
-		}
 		List<Class<?>> list = ClassUtil.getClasses(mainPackage);
 		for (Class<?> cls : list) {
 			if (cls.getAnnotation(RpcMqClient.class) != null) {

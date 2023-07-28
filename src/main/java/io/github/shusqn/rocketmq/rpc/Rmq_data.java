@@ -2,7 +2,7 @@ package io.github.shusqn.rocketmq.rpc;
 
 import com.alibaba.fastjson.JSON;
 
-public class MqRpcData{
+public class Rmq_data{
 	private long msgId;
 	private String reqMapping;
 	private String rs;
@@ -13,14 +13,14 @@ public class MqRpcData{
 	private Object[] args; 
 	private String rsClass;
 	
-	public <T> MqRpcData setResult(T rs) {
+	public <T> Rmq_data setResult(T rs) {
 		this.rs = JSON.toJSONString(rs);
 		rsClass = rs.getClass().getName();
 		args = null;
 		reqMapping = null;
 		return this;
 	}
-	public MqRpcData setCode(int code,  String err) {
+	public Rmq_data setCode(int code,  String err) {
 		this.code = code;
 		this.err = err;
 		return this;
@@ -31,8 +31,8 @@ public class MqRpcData{
 		}
 		return code;
 	}
-	public static MqRpcData build(long msgId, String reqMapping, Object client, Object server, Object[] args){
-		MqRpcData  entity = new MqRpcData();
+	public static Rmq_data build(long msgId, String reqMapping, Object client, Object server, Object[] args){
+		Rmq_data  entity = new Rmq_data();
 		entity.msgId = msgId;
 		entity.reqMapping = reqMapping;
 		entity.args = args;	

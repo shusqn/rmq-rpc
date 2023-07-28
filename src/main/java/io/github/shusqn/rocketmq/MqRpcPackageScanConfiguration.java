@@ -12,7 +12,7 @@ import org.springframework.context.annotation.FilterType;
 
 //main @Import({MqRpcPackageScanConfiguration.class})
 @ComponentScan(
-    basePackages = {"com.frame.rocketmq"},
+    basePackages = {"io.github.shusqn.rocketmq"},
     excludeFilters = {@Filter(
     type = FilterType.CUSTOM,
     classes = {TypeExcludeFilter.class}

@@ -4,9 +4,12 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -25,23 +28,45 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public final class RmqRpcService  extends BaseMqRpcService{
 	
-	private static Map<Long, ArrayBlockingQueue<MqRpcData>> backFuncMap = new ConcurrentHashMap<Long, ArrayBlockingQueue<MqRpcData>>();
-	private static ArrayBlockingQueue<ArrayBlockingQueue<MqRpcData>> waitQueue = new ArrayBlockingQueue<>(10240);
+	private static Map<Long, ArrayBlockingQueue<Rmq_data>> backFuncMap = new ConcurrentHashMap<Long, ArrayBlockingQueue<Rmq_data>>();
+	private static ArrayBlockingQueue<ArrayBlockingQueue<Rmq_data>> waitQueue = new ArrayBlockingQueue<>(10240);
 
 	private static RmqRpcService instance;
 	
-	@PostConstruct
-	private void init() {
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		super.setApplicationContext(applicationContext);
 		instance = this;
+		
+		log.info("init RmqRpcService");
 	}
+		
 	/**
 	 * @param nameServerAddr
 	 * @param localServerId
 	 */
 	public static void registerClient(String nameServerAddr, int localServerId) {
 		log.info("registerClient");
-
 		instance.initClient(nameServerAddr, localServerId);
+	}
+	
+	/**
+	 * 
+	 * @param <T>
+	 * @param backFunc
+	 * @param reqMapping
+	 * @param serverName
+	 * @param args
+	 */
+	/**
+	 * 远程调用
+	 * @param backFunc
+	 * @param reqMapping
+	 * @param serverName
+	 * @param args
+	 */
+	public static void asynSendAndReceiveRpcMsg(Consumer<Rmq_data> backFunc, String reqMapping, Object serverName, Object... args) {
+		instance.sendAndReceiveRpcMsg(backFunc, reqMapping, serverName, args);
 	}
 
 	/**
@@ -50,16 +75,15 @@ public final class RmqRpcService  extends BaseMqRpcService{
 	 * @param targetServer
 	 */
 	public static void registerServer(String nameServerAddr, int localServerId, @NonNull String targetServer) {
-		log.info("registerClient");
-
+		log.info("registerServer");
 		instance.initServer(nameServerAddr, localServerId, targetServer);
 	}
 	
 	/**
 	 * @param data
 	 */
-	private static void backFunc(MqRpcData data) {
-		ArrayBlockingQueue<MqRpcData> handerQueue = backFuncMap.remove(data.getMsgId());
+	private static void backFunc(Rmq_data data) {
+		ArrayBlockingQueue<Rmq_data> handerQueue = backFuncMap.remove(data.getMsgId());
 		if (handerQueue != null) {
 			handerQueue.offer(data);
 		}
@@ -75,14 +99,14 @@ public final class RmqRpcService  extends BaseMqRpcService{
 	 */
 	@SuppressWarnings("unchecked")
 	protected static <T> T callBack(String reqMapping, Object server, Object... args) {
-		ArrayBlockingQueue<MqRpcData> handerQueue = waitQueue.poll();
+		ArrayBlockingQueue<Rmq_data> handerQueue = waitQueue.poll();
 		if (handerQueue == null) {
 			handerQueue = new ArrayBlockingQueue<>(1);
 		}
-		MqRpcData sendData = instance.sendAndReceiveRpcMsg(RmqRpcService::backFunc, reqMapping, server, args);
+		Rmq_data sendData = instance.sendAndReceiveRpcMsg(RmqRpcService::backFunc, reqMapping, server, args);
 		backFuncMap.put(sendData.getMsgId(), handerQueue);
 
-		MqRpcData backData = null;
+		Rmq_data backData = null;
 		try {
 			backData = handerQueue.poll(instance.TIME_OUT, TimeUnit.SECONDS);
 			if (backData == null) {

@@ -6,7 +6,6 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Service;
 
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,14 +16,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Service
-public final class RmqRpcAsynService  extends BaseMqRpcService{
+public final class RmqRpcAsynService {
 	
 	private static RmqRpcAsynService instance;
 	
 	@PostConstruct
 	private void init() {
 		instance = this;
-		instance.asyn =  true;
+		//instance.asyn =  true;
 	}
 	/**
 	 * @param nameServerAddr
@@ -33,20 +32,9 @@ public final class RmqRpcAsynService  extends BaseMqRpcService{
 	public static void registerClient(String nameServerAddr, int localServerId) {
 		log.info("registerClient");
 
-		instance.initClient(nameServerAddr, localServerId);
+		//instance.initClient(nameServerAddr, localServerId);
 	}
 
-	/**
-	 * @param nameServerAddr
-	 * @param localServerId
-	 * @param targetServer
-	 */
-	public static void registerServer(String nameServerAddr, int localServerId, @NonNull String targetServer) {
-		log.info("registerClient");
-
-		instance.initServer(nameServerAddr, localServerId, targetServer);
-	}
-	
 	/**
 	 * 远程调用
 	 * @param <T>
@@ -55,8 +43,8 @@ public final class RmqRpcAsynService  extends BaseMqRpcService{
 	 * @param serverName
 	 * @param args
 	 */
-	public static void remoteCallFunc(Consumer<MqRpcData> backFunc, String reqMapping, Object serverName, Object[] args) {
-		instance.sendAndReceiveRpcMsg(backFunc, reqMapping, serverName, args);
+	public static void remoteCallFunc(Consumer<Rmq_data> backFunc, String reqMapping, Object serverName, Object[] args) {
+		//instance.sendAndReceiveRpcMsg(backFunc, reqMapping, serverName, args);
 	}
 		
 }
