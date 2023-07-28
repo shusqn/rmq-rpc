@@ -116,8 +116,7 @@
 				<executions>
 					<execution>
 						<id>attach-sources</id>
-						<phase>install</phase><!-- 要绑定到的生命周期的阶段
-						在verify之后，install之前执行下面指定的goal -->
+						<phase>verify</phase><!-- 要绑定到的生命周期的阶段在verify之后，install之前执行下面指定的goal -->
 						<goals>
 							<goal>jar-no-fork</goal><!-- 类似执行mvn sources:jar -->
 						</goals>
@@ -129,10 +128,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
+				<version>3.0.1</version>
+				<configuration>
+					<skip>flalse</skip>
+				</configuration>
 				<executions>
 					<execution>
-						<id>sign-artifacts</id>
 						<phase>verify</phase>
 						<goals>
 							<goal>sign</goal>
@@ -149,7 +150,7 @@
 				<configuration>
 					<serverId>${serverId}</serverId>
 					<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-					<autoReleaseAfterClose>false</autoReleaseAfterClose>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
 			</plugin>
 
