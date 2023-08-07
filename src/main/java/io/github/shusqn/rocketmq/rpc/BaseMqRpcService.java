@@ -89,7 +89,8 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 	/**
 	 * rpc 数据发送器
 	 */
-	private  AbstractProducerService rocketMqSender = new AbstractProducerService() {};
+	private  AbstractProducerService rocketMqSender;
+	
 	/**
 	 * rpc 请求 回调函数 路由器
 	 */
@@ -98,14 +99,13 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 	 * rpc type 类型路由器
 	 */
 	private RouterHander<Rmq_data> rpcReqRouter = new RouterHander<Rmq_data>() {};
-	private int localServerId;
-	private boolean initOK = false;
+	private Integer localServerId;
 	
 	/**
 	 * @param nameServerAddr
 	 * @param localServerId
 	 */
-	protected synchronized void initClient(String nameServerAddr, int localServerId) {
+	protected synchronized void initClient(@NonNull  String nameServerAddr, @NonNull  Integer localServerId) {
 		 init(nameServerAddr, localServerId, false, null);
 	}
 	
@@ -113,15 +113,15 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 	 * @param nameServerAddr
 	 * @param localServerId
 	 */
-	protected synchronized void initServer(String nameServerAddr, int localServerId, @NonNull  String targetServer) {
-		 init(nameServerAddr, localServerId, false, targetServer);
+	protected synchronized void initServer(@NonNull  String nameServerAddr, @NonNull  String targetServer) {
+		 init(nameServerAddr, null, false, targetServer);
 	}
 	
 	/**
 	 * @param nameServerAddr
 	 * @param localServerId
 	 */
-	protected synchronized void initClientAndServer(String nameServerAddr, int localServerId, @NonNull  String targetServer) {
+	protected synchronized void initClientAndServer(@NonNull  String nameServerAddr, @NonNull  Integer localServerId, @NonNull  String targetServer) {
 		 init(nameServerAddr, localServerId, true, targetServer);
 	}
 	
@@ -129,29 +129,37 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 	 * 初始化mq 地址和本地serverId
 	 * @param nameServerAddr
 	 * @param localServerId
-	 * @param req
-	 * @param resp
+	 * @param clientAndSerever
 	 * @param serverType
 	 * @param accessKeyAndsecretKey
 	 */
-	protected synchronized void init(String nameServerAddr, int localServerId, Boolean clientAndSerever, String serverType, String... accessKeyAndsecretKey) {
+	protected synchronized void init(String nameServerAddr, Integer localServerId, Boolean clientAndSerever, String serverType, String... accessKeyAndsecretKey) {
 		log.info("init RocketMqRpcService");
-		if(initOK) {
-			throw new RuntimeException("非法操作, RocketMqRpcService 已被初始化");
+		if(localServerId != null && mqReqReceive != null) {
+			throw new RuntimeException("非法操作, rocketMqSender mqReqReceive 已被初始化");
 		}
+		if(serverType != null && mqRespReceive != null) {
+			throw new RuntimeException("非法操作, mqRespReceive 已被初始化");
+		}
+		
 		if(accessKeyAndsecretKey.length == 2) {
-			//初始化mq
-			rocketMqSender.start(nameServerAddr, PRODUCER_RPC_GROUP+localServerId, 9, null,  accessKeyAndsecretKey[0],  accessKeyAndsecretKey[1]);
+			if(rocketMqSender == null) {
+				//初始化mq
+				rocketMqSender = new AbstractProducerService() {};
+				rocketMqSender.start(nameServerAddr, PRODUCER_RPC_GROUP, 9, PRODUCER_RPC_GROUP,  accessKeyAndsecretKey[0],  accessKeyAndsecretKey[1]);
+			}
 			
-			if(clientAndSerever || serverType == null) {
+			if(localServerId != null) {
 				mqReqReceive = new MqRpcReceive(MqRpcReceive.TYPE_REQ);
 				mqReqReceive.start(nameServerAddr, 
 						REQ_RPC_SERVER + localServerId, 
 						CONSUMER_REQ_RPC_SERVER + localServerId,
 						CONSUMER_REQ_RPC_SERVER + localServerId, accessKeyAndsecretKey[0],  accessKeyAndsecretKey[1], true);
 			}
+
 			if(serverType != null) {
 				mqRespReceive = new MqRpcReceive(MqRpcReceive.TYPE_RESP);
+				
 				mqRespReceive.start(nameServerAddr, 
 						RESP_RPC_SERVER + serverType, 
 						CONSUMER_RESP_RPC_SERVER  + serverType,
@@ -159,44 +167,42 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 			}
 		}
 		else {
-			//初始化mq
-			rocketMqSender.start(nameServerAddr, PRODUCER_RPC_GROUP+localServerId, 9, null);
-			
-			if(clientAndSerever || serverType == null) {
+			if(rocketMqSender == null) {
+				rocketMqSender = new AbstractProducerService() {};
+				//初始化mq
+				rocketMqSender.start(nameServerAddr, PRODUCER_RPC_GROUP , 9, PRODUCER_RPC_GROUP);
+			}
+			if(localServerId != null) {
 				mqReqReceive = new MqRpcReceive(MqRpcReceive.TYPE_REQ);
 				mqReqReceive.start(nameServerAddr, 
 						REQ_RPC_SERVER + localServerId, 
 						CONSUMER_REQ_RPC_SERVER  + localServerId,
 						CONSUMER_REQ_RPC_SERVER  + localServerId, true);
 			}
+			
 			if(serverType != null) {
 				mqRespReceive = new MqRpcReceive(MqRpcReceive.TYPE_RESP);
+				
 				mqRespReceive.start(nameServerAddr, 
 						RESP_RPC_SERVER + serverType, 
 						CONSUMER_RESP_RPC_SERVER  + serverType,
 						CONSUMER_RESP_RPC_SERVER  + serverType, true);
 			}
 		}
-		rocketMqSender.showSendLogs = false;
+		
+		if(rocketMqSender != null) {
+			rocketMqSender.showSendLogs = false;
+		}
+		
 		this.localServerId = localServerId;
-		initOK = true;
 	}
 	
 	/**
 	 * @param mqRpcType
 	 * @param backFunc
 	 */
-	public void registBackFuncByType(String reqMapping, Function<Object[], Object> backFunc) {
+	private void registBackFuncByType(String reqMapping, Function<Object[], Object> backFunc) {
 		rpcRespRouter.registCallHandler(reqMapping, backFunc);
-		mqRpcExecutor.schedule(()->{
-			if(!initOK) {
-				try {
-					throw new RuntimeException("非法操作, RocketMqRpcService 未被初始化:"+reqMapping);
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-				}
-			}
-		}, 30, TimeUnit.SECONDS);
 	}
 	
 	/**
@@ -208,7 +214,7 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 	 * @param rs
 	 */
 	protected Rmq_data sendAndReceiveRpcMsg(Consumer<Rmq_data> backFunc, String reqMapping, Object serverName, Object[] args) {
-		if(!initOK) {
+		if(rocketMqSender == null) {
 			throw new RuntimeException("非法操作, RocketMqRpcService 未被初始化");
 		}
 		long msgId = msgIdBuilder.getAndIncrement();
@@ -250,7 +256,6 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 		 */
 		private void receiveMqData(String message) {
 			Rmq_data data = JSON.parseObject(message, Rmq_data.class, Feature.SupportNonPublicField);
-			log.debug("getRpc msgId:{} type:{} data:{}",data.getMsgId(), type == 1 ? "reqtype":"resptype", message);
 			if(type == TYPE_RESP) {
 				try {
 					Object rs = rpcRespRouter.pushCallHandler(data.getReqMapping(), data.getArgs());
@@ -264,6 +269,8 @@ public abstract class BaseMqRpcService implements BeanDefinitionRegistryPostProc
 			else if(type == TYPE_REQ) {
 				rpcReqRouter.pushHandler(data.getMsgId(), data);
 			}
+			
+			log.debug("receiveMqData msgId:{} type:{} data:{}",data.getMsgId(), type == TYPE_REQ ? "reqtype":"resptype", message);
 		}
 	}
 	

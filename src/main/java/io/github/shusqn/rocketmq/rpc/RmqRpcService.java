@@ -6,8 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -45,21 +43,13 @@ public final class RmqRpcService  extends BaseMqRpcService{
 	 * @param nameServerAddr
 	 * @param localServerId
 	 */
-	public static void registerClient(String nameServerAddr, int localServerId) {
+	public static void registerClient(@NonNull  String nameServerAddr, @NonNull  Integer localServerId) {
 		log.info("registerClient");
 		instance.initClient(nameServerAddr, localServerId);
 	}
 	
 	/**
-	 * 
-	 * @param <T>
-	 * @param backFunc
-	 * @param reqMapping
-	 * @param serverName
-	 * @param args
-	 */
-	/**
-	 * 远程调用
+	 * 远程异步调用调用
 	 * @param backFunc
 	 * @param reqMapping
 	 * @param serverName
@@ -74,9 +64,9 @@ public final class RmqRpcService  extends BaseMqRpcService{
 	 * @param localServerId
 	 * @param targetServer
 	 */
-	public static void registerServer(String nameServerAddr, int localServerId, @NonNull String targetServer) {
+	public static void registerServer(@NonNull  String nameServerAddr, @NonNull String targetServer) {
 		log.info("registerServer");
-		instance.initServer(nameServerAddr, localServerId, targetServer);
+		instance.initServer(nameServerAddr, targetServer);
 	}
 	
 	/**
